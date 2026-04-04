@@ -1,0 +1,2 @@
+pydantic>=1.10
+typing-extensions>=4.0

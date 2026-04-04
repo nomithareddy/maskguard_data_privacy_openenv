@@ -1,0 +1,20 @@
+name: openenv-maskguard_data_privacy_openenv
+description: Maskguard Data Privacy Openenv environment — dataset remediation scenarios
+tasks:
+  - name: easy_detection
+    difficulty: easy
+  - name: medium_fixing
+    difficulty: medium
+  - name: hard_readiness
+    difficulty: hard
+difficulty: [easy, medium, hard]
+observation_model: models.schema.Observation
+action_model: models.schema.Action
+reward_model: models.schema.Reward
+spec_version: 1
+name: maskguard_data_privacy_openenv
+type: space
+runtime: fastapi
+app: server.app:app
+port: 8000
+
