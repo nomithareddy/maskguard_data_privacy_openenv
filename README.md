@@ -1,3 +1,16 @@
+---
+title: Maskguard Data Privacy OpenEnv Environment Server
+emoji: "🛡️"
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+app_port: 8000
+base_path: /web
+tags:
+  - openenv
+---
+
 # Maskguard Data Privacy OpenEnv
 
 This repository implements a small OpenEnv-compatible environment for dataset
