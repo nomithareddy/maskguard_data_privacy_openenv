@@ -84,6 +84,23 @@ Run the baseline policy:
 python3 baseline/run_baseline.py
 ```
 
+## Inference configuration
+
+`inference.py` uses an OpenAI-compatible client configured by environment variables:
+
+- `API_BASE_URL` with default `https://router.huggingface.co/v1`
+- `MODEL_NAME` with default `openai/gpt-4o-mini`
+- `HF_TOKEN` with no default and required at runtime
+
+Example:
+
+```bash
+export API_BASE_URL="https://router.huggingface.co/v1"
+export MODEL_NAME="openai/gpt-4o-mini"
+export HF_TOKEN="<your-token>"
+python3 inference.py
+```
+
 ## Run the server
 
 Start the FastAPI app locally:
