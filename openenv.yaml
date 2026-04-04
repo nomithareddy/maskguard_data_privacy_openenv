@@ -1,16 +1,16 @@
-name: openenv-maskguard_data_privacy_openenv
+name: maskguard-data-privacy-openenv
 description: Maskguard Data Privacy Openenv environment — dataset remediation scenarios
 tasks:
-  - name: easy_detection
-    difficulty: easy
-  - name: medium_fixing
-    difficulty: medium
-  - name: hard_readiness
-    difficulty: hard
-difficulty: [easy, medium, hard]
-observation_model: models.schema.Observation
-action_model: models.schema.Action
-reward_model: models.schema.Reward
+  - detect_pii
+  - fix_missing_values
+  - enforce_dataset_readiness
+difficulty:
+  - easy
+  - medium
+  - hard
+observation_model: MaskguardDataPrivacyOpenenvObservation
+action_model: MaskguardDataPrivacyOpenenvAction
+reward_model: float
 spec_version: 1
 name: maskguard_data_privacy_openenv
 type: space

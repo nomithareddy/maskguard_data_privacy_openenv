@@ -1,0 +1,8 @@
+{
+  "columns": ["id", "email", "signup_date"],
+  "pii_detected": ["email"],
+  "missing_values": ["signup_date"],
+  "duplicates": true,
+  "schema_valid": true,
+  "bias_detected": false
+}

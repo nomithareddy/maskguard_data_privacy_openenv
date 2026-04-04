@@ -1,3 +1,240 @@
+"""Inference script for OpenEnv evaluator format.
+
+Runs the required action sequence against the local environment and prints
+three evaluator-formatted lines: [START], [STEP] (per step), and [END].
+"""
+
+from typing import List, Optional
+
+from server.maskguard_data_privacy_openenv_environment import MaskguardDataPrivacyOpenenvEnvironment
+from models import MaskguardDataPrivacyOpenenvAction
+from server import graders
+
+
+def log_start() -> None:
+    print("[START]", flush=True)
+
+
+def log_step(step: int, action: str, reward: float, done: bool, error: Optional[str]) -> None:
+    err = error if error else "null"
+    print(f"[STEP] step={step} action={action} reward={reward:.2f} done={str(done).lower()} error={err}", flush=True)
+
+
+def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
+    rewards_str = ",".join(f"{r:.2f}" for r in rewards)
+    print(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}", flush=True)
+
+
+def run_episode() -> None:
+    env = MaskguardDataPrivacyOpenenvEnvironment()
+    log_start()
+
+    obs = env.reset()
+    if obs is None:
+        raise RuntimeError("reset() did not return an observation")
+
+    actions = [
+        "MASK_EMAIL",
+        "REMOVE_DUPLICATES",
+        "FILL_MISSING_VALUES",
+        "VALIDATE_SCHEMA",
+    ]
+
+    rewards: List[float] = []
+    step = 0
+
+    for a in actions:
+        step += 1
+        try:
+            action = MaskguardDataPrivacyOpenenvAction(action_type=a)
+            obs = env.step(action)
+            reward = float(getattr(obs, "reward", 0.0) or 0.0)
+            done = bool(getattr(obs, "done", False))
+            rewards.append(reward)
+            log_step(step=step, action=a, reward=reward, done=done, error=None)
+            if done:
+                break
+        except Exception as exc:
+            log_step(step=step, action=a, reward=0.0, done=False, error=str(exc))
+
+    state = {
+        "pii_detected": getattr(obs, "pii_detected", []),
+        "duplicates": getattr(obs, "duplicates", False),
+        "missing_values": getattr(obs, "missing_values", []),
+        "schema_valid": getattr(obs, "schema_valid", False),
+        "bias_detected": getattr(obs, "bias_detected", False),
+    }
+
+    score = float(graders.grade_hard(state))
+    success = score >= 0.5
+
+    log_end(success=success, steps=step, score=score, rewards=rewards)
+
+
+if __name__ == "__main__":
+    try:
+        run_episode()
+    except Exception:
+        print("[END] success=false steps=0 score=0.000 rewards=", flush=True)
+        raise
+"""Inference script for OpenEnv evaluator format.
+
+Runs the required action sequence against the local environment and prints
+three evaluator-formatted lines: [START], [STEP] (per step), and [END].
+"""
+
+from typing import List, Optional
+
+from server.maskguard_data_privacy_openenv_environment import MaskguardDataPrivacyOpenenvEnvironment
+from models import MaskguardDataPrivacyOpenenvAction
+from server import graders
+
+
+def log_start() -> None:
+    print("[START]", flush=True)
+
+
+def log_step(step: int, action: str, reward: float, done: bool, error: Optional[str]) -> None:
+    err = error if error else "null"
+    print(f"[STEP] step={step} action={action} reward={reward:.2f} done={str(done).lower()} error={err}", flush=True)
+
+
+def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
+    rewards_str = ",".join(f"{r:.2f}" for r in rewards)
+    print(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}", flush=True)
+
+
+def run_episode() -> None:
+    env = MaskguardDataPrivacyOpenenvEnvironment()
+    log_start()
+
+    obs = env.reset()
+    if obs is None:
+        raise RuntimeError("reset() did not return an observation")
+
+    actions = [
+        "MASK_EMAIL",
+        "REMOVE_DUPLICATES",
+        "FILL_MISSING_VALUES",
+        "VALIDATE_SCHEMA",
+    ]
+
+    rewards: List[float] = []
+    step = 0
+
+    for a in actions:
+        step += 1
+        try:
+            action = MaskguardDataPrivacyOpenenvAction(action_type=a)
+            obs = env.step(action)
+            reward = float(getattr(obs, "reward", 0.0) or 0.0)
+            done = bool(getattr(obs, "done", False))
+            rewards.append(reward)
+            log_step(step=step, action=a, reward=reward, done=done, error=None)
+            if done:
+                break
+        except Exception as exc:
+            log_step(step=step, action=a, reward=0.0, done=False, error=str(exc))
+
+    state = {
+        "pii_detected": getattr(obs, "pii_detected", []),
+        "duplicates": getattr(obs, "duplicates", False),
+        "missing_values": getattr(obs, "missing_values", []),
+        "schema_valid": getattr(obs, "schema_valid", False),
+        "bias_detected": getattr(obs, "bias_detected", False),
+    }
+
+    score = float(graders.grade_hard(state))
+    success = score >= 0.5
+
+    log_end(success=success, steps=step, score=score, rewards=rewards)
+
+
+if __name__ == "__main__":
+    try:
+        run_episode()
+    except Exception:
+        print("[END] success=false steps=0 score=0.000 rewards=", flush=True)
+        raise
+"""Inference script for OpenEnv evaluator format.
+
+Runs the required action sequence against the local environment and prints
+three evaluator-formatted lines: [START], [STEP] (per step), and [END].
+"""
+
+from typing import List, Optional
+
+from server.maskguard_data_privacy_openenv_environment import MaskguardDataPrivacyOpenenvEnvironment
+from models import MaskguardDataPrivacyOpenenvAction
+from server import graders
+
+
+def log_start() -> None:
+    print("[START]", flush=True)
+
+
+def log_step(step: int, action: str, reward: float, done: bool, error: Optional[str]) -> None:
+    err = error if error else "null"
+    print(f"[STEP] step={step} action={action} reward={reward:.2f} done={str(done).lower()} error={err}", flush=True)
+
+
+def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
+    rewards_str = ",".join(f"{r:.2f}" for r in rewards)
+    print(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}", flush=True)
+
+
+def run_episode() -> None:
+    env = MaskguardDataPrivacyOpenenvEnvironment()
+    log_start()
+
+    obs = env.reset()
+    if obs is None:
+        raise RuntimeError("reset() did not return an observation")
+
+    actions = [
+        "MASK_EMAIL",
+        "REMOVE_DUPLICATES",
+        "FILL_MISSING_VALUES",
+        "VALIDATE_SCHEMA",
+    ]
+
+    rewards: List[float] = []
+    step = 0
+
+    for a in actions:
+        step += 1
+        try:
+            action = MaskguardDataPrivacyOpenenvAction(action_type=a)
+            obs = env.step(action)
+            reward = float(getattr(obs, "reward", 0.0) or 0.0)
+            done = bool(getattr(obs, "done", False))
+            rewards.append(reward)
+            log_step(step=step, action=a, reward=reward, done=done, error=None)
+            if done:
+                break
+        except Exception as exc:
+            log_step(step=step, action=a, reward=0.0, done=False, error=str(exc))
+
+    state = {
+        "pii_detected": getattr(obs, "pii_detected", []),
+        "duplicates": getattr(obs, "duplicates", False),
+        "missing_values": getattr(obs, "missing_values", []),
+        "schema_valid": getattr(obs, "schema_valid", False),
+        "bias_detected": getattr(obs, "bias_detected", False),
+    }
+
+    score = float(graders.grade_hard(state))
+    success = score >= 0.5
+
+    log_end(success=success, steps=step, score=score, rewards=rewards)
+
+
+if __name__ == "__main__":
+    try:
+        run_episode()
+    except Exception:
+        print("[END] success=false steps=0 score=0.000 rewards=", flush=True)
+        raise
 """
 Inference Script Example
 ===================================
@@ -51,7 +288,7 @@ from openai import OpenAI
 
 from my_env_v4 import MyEnvV4Action, MyEnvV4Env
 IMAGE_NAME = os.getenv("IMAGE_NAME") # If you are using docker image 
-API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
+API_KEY = os.getenv("HF_TOKEN") or os.getenv("<REDACTED_TOKEN>")
 
 API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
 MODEL_NAME = os.getenv("MODEL_NAME") or "Qwen/Qwen2.5-72B-Instruct"
@@ -64,30 +301,32 @@ SUCCESS_SCORE_THRESHOLD = 0.1  # normalized score in [0, 1]
 
 # Max possible reward: each token contributes 0.1, across all steps
 _MAX_REWARD_PER_STEP = MAX_TOKENS * 0.1
-MAX_TOTAL_REWARD = MAX_STEPS * _MAX_REWARD_PER_STEP
+"""Simple inference script that runs directly against the local environment.
 
-SYSTEM_PROMPT = textwrap.dedent(
-    """
-    You are interacting with a simple echo environment.
-    Each turn you must send a message. The environment will echo it back.
-    Reward is proportional to message length: reward = len(message) * 0.1
-    Your goal is to maximize total reward by sending meaningful, substantive messages.
-    Reply with exactly one message string — no quotes, no prefixes, just the message text.
-    """
-).strip()
+This script follows the OpenEnv evaluator stdout format and executes a fixed
+sequence of actions to demonstrate environment behavior.
+
+It emits the three required line types (one [START], multiple [STEP], one [END]).
+"""
+
+from typing import List, Optional
+import sys
+
+from server.maskguard_data_privacy_openenv_environment import (
+    MaskguardDataPrivacyOpenenvEnvironment,
+)
+from models import MaskguardDataPrivacyOpenenvAction
+from server import graders
 
 
-def log_start(task: str, env: str, model: str) -> None:
-    print(f"[START] task={task} env={env} model={model}", flush=True)
+def log_start() -> None:
+    # Minimal START line (no extra fields required by the request)
+    print("[START]", flush=True)
 
 
 def log_step(step: int, action: str, reward: float, done: bool, error: Optional[str]) -> None:
-    error_val = error if error else "null"
-    done_val = str(done).lower()
-    print(
-        f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}",
-        flush=True,
-    )
+    err = error if error else "null"
+    print(f"[STEP] step={step} action={action} reward={reward:.2f} done={str(done).lower()} error={err}", flush=True)
 
 
 def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
@@ -95,94 +334,67 @@ def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> No
     print(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}", flush=True)
 
 
-def build_user_prompt(step: int, last_echoed: str, last_reward: float, history: List[str]) -> str:
-    history_block = "\n".join(history[-4:]) if history else "None"
-    return textwrap.dedent(
-        f"""
-        Step: {step}
-        Last echoed message: {last_echoed!r}
-        Last reward: {last_reward:.2f}
-        Previous steps:
-        {history_block}
-        Send your next message.
-        """
-    ).strip()
+def run_episode() -> None:
+    env = MaskguardDataPrivacyOpenenvEnvironment()
 
+    log_start()
 
-def get_model_message(client: OpenAI, step: int, last_echoed: str, last_reward: float, history: List[str]) -> str:
-    user_prompt = build_user_prompt(step, last_echoed, last_reward, history)
-    try:
-        completion = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=TEMPERATURE,
-            max_tokens=MAX_TOKENS,
-            stream=False,
-        )
-        text = (completion.choices[0].message.content or "").strip()
-        return text if text else "hello"
-    except Exception as exc:
-        print(f"[DEBUG] Model request failed: {exc}", flush=True)
-        return "hello"
+    obs = env.reset()
+    if obs is None:
+        raise RuntimeError("reset() did not return an observation")
 
+    actions = [
+        "MASK_EMAIL",
+        "REMOVE_DUPLICATES",
+        "FILL_MISSING_VALUES",
+        "VALIDATE_SCHEMA",
+    ]
 
-async def main() -> None:
-    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
-
-    env = await MyEnvV4Env.from_docker_image(IMAGE_NAME)
-
-    history: List[str] = []
     rewards: List[float] = []
-    steps_taken = 0
-    score = 0.0
-    success = False
+    step = 0
+    last_error: Optional[str] = None
 
-    log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
-
-    try:
-        result = await env.reset() # OpenENV.reset()
-        last_echoed = result.observation.echoed_message
-        last_reward = 0.0
-
-        for step in range(1, MAX_STEPS + 1):
-            if result.done:
-                break
-
-            message = get_model_message(client, step, last_echoed, last_reward, history)
-
-            result = await env.step(MyEnvV4Action(message=message))
-            obs = result.observation
-
-            reward = result.reward or 0.0
-            done = result.done
-            error = None
-
+    for a in actions:
+        step += 1
+        try:
+            action = MaskguardDataPrivacyOpenenvAction(action_type=a)
+            obs = env.step(action)
+            reward = float(getattr(obs, "reward", 0.0) or 0.0)
+            done = bool(getattr(obs, "done", False))
             rewards.append(reward)
-            steps_taken = step
-            last_echoed = obs.echoed_message
-            last_reward = reward
-
-            log_step(step=step, action=message, reward=reward, done=done, error=error)
-
-            history.append(f"Step {step}: {message!r} -> reward {reward:+.2f}")
-
+            log_step(step=step, action=a, reward=reward, done=done, error=None)
             if done:
                 break
+        except Exception as exc:
+            last_error = str(exc)
+            log_step(step=step, action=a, reward=0.0, done=False, error=last_error)
 
-        score = sum(rewards) / MAX_TOTAL_REWARD if MAX_TOTAL_REWARD > 0 else 0.0
-        score = min(max(score, 0.0), 1.0)  # clamp to [0, 1]
-        success = score >= SUCCESS_SCORE_THRESHOLD
+    # Compute final score using hard grader if schema invalid, otherwise medium/easy
+    state = {
+        "pii_detected": getattr(obs, "pii_detected", []),
+        "duplicates": getattr(obs, "duplicates", False),
+        "missing_values": getattr(obs, "missing_values", []),
+        "schema_valid": getattr(obs, "schema_valid", False),
+        "bias_detected": getattr(obs, "bias_detected", False),
+    }
 
-    finally:
-        try:
-            await env.close()
-        except Exception as e:
-            print(f"[DEBUG] env.close() error (container cleanup): {e}", flush=True)
-        log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
+    # decide which grader to use: prefer hard if schema was initially invalid
+    score_easy = graders.grade_easy(state)
+    score_medium = graders.grade_medium(state)
+    score_hard = graders.grade_hard(state)
+
+    # pick the strictest (highest demand) grader result as the final score
+    score = float(score_hard)
+
+    success = score >= 0.999 or score >= 0.5
+
+    log_end(success=success, steps=step, score=score, rewards=rewards)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        run_episode()
+    except Exception as exc:
+        # ensure [END] is still printed in case of failure
+        print(f"[END] success=false steps=0 score=0.000 rewards=", flush=True)
+        raise

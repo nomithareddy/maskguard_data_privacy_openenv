@@ -1,0 +1,8 @@
+{
+  "columns": ["name", "email"],
+  "pii_detected": ["email"],
+  "missing_values": [],
+  "duplicates": false,
+  "schema_valid": true,
+  "bias_detected": false
+}

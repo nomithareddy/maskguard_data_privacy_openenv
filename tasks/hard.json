@@ -1,0 +1,8 @@
+{
+  "columns": ["id", "email", "salary"],
+  "pii_detected": ["email"],
+  "missing_values": ["salary"],
+  "duplicates": true,
+  "schema_valid": false,
+  "bias_detected": true
+}

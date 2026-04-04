@@ -2,7 +2,7 @@ FROM python:3.10-slim
 WORKDIR /app
 COPY . /app
 RUN pip install --no-cache-dir -r requirements.txt
-CMD ["python", "baseline/run_baseline.py"]
+CMD ["python", "inference.py"]
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # All rights reserved.
 #

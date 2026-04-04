@@ -26,97 +26,128 @@ Supported actions (`models.schema.Action.action_type`):
 - MASK_EMAIL
 - MASK_PHONE
 - REMOVE_DUPLICATES
-- FILL_MISSING_VALUES
-- VALIDATE_SCHEMA
-- STANDARDIZE_FORMAT
-- DROP_COLUMN (payload: {"column": "colname"})
-- FLAG_BIAS
-- APPLY_POLICY_RULE (payload: {"rule": "rule_name"})
+# Maskguard Data Privacy Openenv
 
-## Reward strategy
+Project Overview
+----------------
 
-Rewards use shaping:
+This repository implements a small OpenEnv environment that simulates dataset
+readiness and privacy remediation tasks. The environment presents datasets with
+PII and data-quality issues (missing values, duplicates, schema problems, and
+bias indicators). Actions allow masking PII, removing duplicates, filling
+missing values, validating schemas, and applying policy rules. Graders compute
+readiness scores in [0.0, 1.0].
+
+Observation Space
+-----------------
+
+Observation model: `MaskguardDataPrivacyOpenenvObservation` (see `models.py`)
+
+Fields:
+
+- `columns`: list of column names
+- `pii_detected`: list of detected PII types (e.g., `email`, `phone`)
+- `missing_values`: list of columns with missing values
+- `duplicates`: bool indicating duplicate rows
+- `schema_valid`: whether the dataset schema is valid
+- `bias_detected`: whether potential bias is present
+- `done`: episode done
+- `reward`: last step reward (float)
+
+Action Space
+------------
+
+Action model: `MaskguardDataPrivacyOpenenvAction` (see `models.py`)
+
+Supported actions (action_type):
+
+- `DETECT_PII`
+- `MASK_EMAIL`
+- `MASK_PHONE`
+- `REMOVE_DUPLICATES`
+- `FILL_MISSING_VALUES`
+- `VALIDATE_SCHEMA`
+- `STANDARDIZE_FORMAT`
+- `DROP_COLUMN` (payload: {"column": "colname"})
+- `FLAG_BIAS`
+- `APPLY_POLICY_RULE` (payload: {"rule": "rule_name"})
+
+Reward Strategy
+---------------
+
+Rewards are shaped to encourage fixing issues and discourage damaging actions:
+
 - Positive reward for fixing issues (masking PII, removing duplicates, filling missing values, validating schema).
-- Negative reward for actions that damage quality (dropping useful columns, acting with no effect).
-- Final readiness score between 0.0 and 1.0 computed by graders per difficulty.
+- Small negative reward when an action has no effect or harms dataset quality.
+- The environment returns a per-step `reward` (float). Graders compute a
+    final readiness score in [0.0, 1.0].
 
-## Tasks
+Task Definitions
+----------------
 
-15 scenarios included across difficulties:
-- 5 easy (detection-focused)
-- 5 medium (fix-focused)
-- 5 hard (full readiness)
+Three top-level tasks are provided in `tasks/` (simple JSON scenarios):
 
-Files:
-- `env/data_env.py` — environment implementation
-- `models/schema.py` — Pydantic models
-- `tasks/` — scenario definitions
-- `graders/` — graders for each difficulty
-- `baseline/run_baseline.py` — example baseline runner
+- `easy.json` — detection-focused scenario
+- `medium.json` — fixing-focused scenario
+- `hard.json` — full readiness scenario
 
-## Setup
+Each JSON contains a single dataset scenario describing the initial state.
 
-Install requirements:
+Setup Instructions
+------------------
+
+Install dependencies:
 
 ```bash
 python3 -m pip install -r requirements.txt
 ```
 
-Run baseline locally:
+Run the inference script locally:
 
 ```bash
-python3 baseline/run_baseline.py
+python3 inference.py
 ```
 
-## Docker
+Run pre-validation checks:
 
-Build and run the Docker image:
+```bash
+python3 pre_validation.py
+```
+
+Docker Usage
+------------
+
+Build and run the Docker image which executes `inference.py`:
 
 ```bash
 docker build -t maskguard-env:local .
 docker run --rm maskguard-env:local
 ```
----
-title: Maskguard Data Privacy Openenv Environment Server
-emoji: ⏲️
-colorFrom: gray
-colorTo: gray
-sdk: docker
-pinned: false
-app_port: 8000
-base_path: /web
-tags:
-  - openenv
----
 
-# Maskguard Data Privacy Openenv Environment
+Inference Script Usage
+----------------------
 
-A simple test environment that echoes back messages. Perfect for testing the env APIs as well as demonstrating environment usage patterns.
+The `inference.py` script runs a fixed sequence of remediation actions and
+prints the OpenEnv evaluator-format lines to stdout:
 
-## Quick Start
+- `[START]` — start of episode
+- `[STEP] ...` — one line per step with `action`, `reward` (2 decimal places), `done` (lowercase true/false), and `error` (or null)
+- `[END] ...` — final line with `success` (lowercase), `steps`, `score` (0.000..1.000), and `rewards` (comma-separated, 2 decimals)
 
-The simplest way to use the Maskguard Data Privacy Openenv environment is through the `MaskguardDataPrivacyOpenenvEnv` class:
+Dataset Readiness Simulation
+---------------------------
 
-```python
-from maskguard_data_privacy_openenv import MaskguardDataPrivacyOpenenvAction, MaskguardDataPrivacyOpenenvEnv
+The environment simulates detection and remediation of:
 
-try:
-    # Create environment from Docker image
-    maskguard_data_privacy_openenvenv = MaskguardDataPrivacyOpenenvEnv.from_docker_image("maskguard_data_privacy_openenv-env:latest")
+- Personally Identifiable Information (PII) like `email`, `phone`.
+- Missing values for specified columns.
+- Duplicate rows flag.
+- Invalid schema flag.
+- Potential dataset bias.
 
-    # Reset
-    result = maskguard_data_privacy_openenvenv.reset()
-    print(f"Reset: {result.observation.echoed_message}")
-
-    # Send multiple messages
-    messages = ["Hello, World!", "Testing echo", "Final message"]
-
-    for msg in messages:
-        result = maskguard_data_privacy_openenvenv.step(MaskguardDataPrivacyOpenenvAction(message=msg))
-        print(f"Sent: '{msg}'")
-        print(f"  → Echoed: '{result.observation.echoed_message}'")
-        print(f"  → Length: {result.observation.message_length}")
-        print(f"  → Reward: {result.reward}")
+Grader functions (`server/graders.py`) compute final readiness scores per
+difficulty level. The inference and baseline scripts demonstrate typical
+interactions and scoring.
 
 finally:
     # Always clean up
