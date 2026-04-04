@@ -1,33 +1,27 @@
 from __future__ import annotations
 
-from models.schema import Observation
+import sys
+from pathlib import Path
+
+MODELS_DIR = Path(__file__).resolve().parents[1] / "models"
+if str(MODELS_DIR) not in sys.path:
+    sys.path.insert(0, str(MODELS_DIR))
+
+from schema import Observation
 
 
 def grade_medium(obs: Observation) -> float:
-    """Grade fixing tasks: measure how many issues have been fixed."""
-    total = 0
-    fixed = 0
+    """Medium grader: email removed, duplicates removed, and missing values fixed."""
+    total = 3.0
+    score = 0.0
 
-    # PII
-    if obs.pii_detected:
-        total += len(obs.pii_detected)
-    else:
-        total += 1
-        fixed += 1
+    if "email" not in obs.pii_detected:
+        score += 1.0
 
-    # missing values
-    total += 1
-    if not obs.missing_values:
-        fixed += 1
-
-    # duplicates
-    total += 1
     if not obs.duplicates:
-        fixed += 1
+        score += 1.0
 
-    # schema
-    total += 1
-    if obs.schema_valid:
-        fixed += 1
+    if not obs.missing_values:
+        score += 1.0
 
-    return max(0.0, min(1.0, fixed / total))
+    return max(0.0, min(1.0, score / total))

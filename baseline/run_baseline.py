@@ -1,23 +1,31 @@
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+MODELS_DIR = ROOT / "models"
+for path in (ROOT, MODELS_DIR):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
+
 from env.data_env import DataEnv
-from models.schema import Action
+from schema import Action
 
 
 def baseline_policy(obs):
-    """Simple policy: detect PII, mask emails/phones, remove duplicates, fill missing, validate schema."""
-    actions = []
-    actions.append(Action(action_type="DETECT_PII"))
+    """Simple policy that clears common readiness blockers."""
+    actions = [Action(action_type="DETECT_PII")]
 
-    # mask known PII
-    for p in list(obs.pii_detected):
-        if p == "email":
+    for pii_type in list(obs.pii_detected):
+        if pii_type == "email":
             actions.append(Action(action_type="MASK_EMAIL"))
-        elif p == "phone":
+        elif pii_type == "phone":
             actions.append(Action(action_type="MASK_PHONE"))
+        elif pii_type in obs.columns:
+            actions.append(Action(action_type="DROP_COLUMN", payload={"column": pii_type}))
         else:
-            # fallback to applying a policy rule
-            actions.append(Action(action_type="APPLY_POLICY_RULE", payload={"rule": f"mask_{p}"}))
+            actions.append(Action(action_type="APPLY_POLICY_RULE", payload={"rule": f"mask_{pii_type}"}))
 
     if obs.duplicates:
         actions.append(Action(action_type="REMOVE_DUPLICATES"))
@@ -28,7 +36,7 @@ def baseline_policy(obs):
     if not obs.schema_valid:
         actions.append(Action(action_type="VALIDATE_SCHEMA"))
 
-    if obs.bias_detected:
+    if obs.bias_detected and "flag_bias" not in obs.policy_rules:
         actions.append(Action(action_type="FLAG_BIAS"))
 
     return actions
@@ -37,19 +45,23 @@ def baseline_policy(obs):
 def run(difficulty: str = "easy") -> float:
     env = DataEnv(difficulty=difficulty)
     obs = env.reset()
-    print("Initial state:", obs.dict())
+    print("Initial state:", obs.model_dump())
 
     steps = 0
+    info = {"readiness": 0.0}
     while True:
         actions = baseline_policy(obs)
         if not actions:
             break
-        for a in actions:
-            obs, reward, done, info = env.step(a)
-            print(f"Action: {a.action_type} → reward {reward}")
+
+        done = False
+        for action in actions:
+            obs, reward, done, info = env.step(action)
+            print(f"Action: {action.action_type} -> reward {reward}")
             steps += 1
             if done:
                 break
+
         if done:
             break
 
@@ -59,7 +71,6 @@ def run(difficulty: str = "easy") -> float:
 
 
 if __name__ == "__main__":
-    # run all difficulties sequentially for demonstration
-    for d in ("easy", "medium", "hard"):
-        print("\n=== Running baseline for difficulty:", d, "===")
-        run(d)
+    for difficulty in ("easy", "medium", "hard"):
+        print(f"\n=== Running baseline for difficulty: {difficulty} ===")
+        run(difficulty)
